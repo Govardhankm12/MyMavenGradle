@@ -1,50 +1,86 @@
 pipeline {
+
     agent any
 
-    environment {
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+
+
+    tools {
+
+        gradle 'Gradle'
+
+        jdk 'JDK'
+
     }
+
+
 
     stages {
 
-        stage('Checkout SCM') {
+        stage('Checkout') {
+
             steps {
-                git 'https://github.com/Govardhankm12/MyMavenGradle.git'
+
+                git branch: 'master', url: 'https://github.com/Govardhankm12/MyMavenGradle.git'
+
             }
+
         }
+
+
 
         stage('Build') {
+
             steps {
-                sh 'echo "Using Java:"'
-                sh 'java -version'
-                sh 'chmod +x gradlew'
-                sh './gradlew clean build'
+
+                sh './gradlew clean build'   // ✅ use wrapper (more reliable)
+
             }
+
         }
 
-        stage('Test (Selenium)') {
+
+
+        stage('Test') {
+
             steps {
+
                 sh './gradlew test'
+
             }
+
         }
 
-        stage('Report') {
+
+
+        stage('Run Application') {
+
             steps {
-                junit '**/build/test-results/test/*.xml'
+
+                sh 'java -jar build/libs/*.jar'
+
             }
+
         }
+
     }
+
+
 
     post {
-        always {
-            echo 'Pipeline completed'
-        }
-        failure {
-            echo 'Build or tests failed!'
-        }
+
         success {
-            echo 'Build successful!'
+
+            echo 'Build and deployment successful!'
+
         }
+
+        failure {
+
+            echo 'Build failed!'
+
+        }
+
     }
+
 }
+
